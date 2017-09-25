@@ -1,0 +1,305 @@
+{
+  "aspects": [
+    {
+      "name": "built",
+      "type": "built",
+      "vcsrepo": {
+        "provider": "git-annex",
+        "source": "${user.git-annex.name}@192.0.2.100:/gitroot/${component}/built",
+        "revision": "${branch}-${built}"
+      }
+    },
+    {
+      "name": "memcheck",
+      "type": "memcheck",
+      "vcsrepo": {
+        "provider": "git",
+        "source": "${user.git.name}@192.0.2.100:/gitroot/${component}/memcheck",
+        "revision": "${branch}"
+      }
+    },
+    {
+      "name": "code",
+      "type": "code",
+      "vcsrepo": {
+        "provider": "bzr",
+        "source": "${user.bzr.name}@192.0.2.100:/bzrroot/${component}/code",
+        "revision": "${branch}"
+      }
+    },
+    {
+      "name": "test",
+      "type": "test",
+      "vcsrepo": {
+        "provider": "svn",
+        "source": "${user.svn.name}@192.0.2.100:/svnroot/${branch}/${component}/test",
+        "revision": "HEAD"
+      }
+    }
+  ],
+  "commands": [
+    {
+      "name": "clean",
+      "type": "command",
+      "command": ["clean.py"]
+    },
+    {
+      "name": "build",
+      "type": "command",
+      "command": ["build.sh"],
+      "env": {
+        "xyz": "zy"
+      }
+    },
+    {
+      "name": "test",
+      "type": "command",
+      "command": ["buildscripts/test.py"]
+    },
+    {
+      "name": "copy",
+      "type": "command",
+      "command": ["./copytobuilt.py"]
+    },
+    {
+      "name": "assemble_run",
+      "type": "command",
+      "command": ["./.if_top/assemble_run.py"]
+    }
+  ],
+  "sandbox_types": [
+    {
+      "name": "dev",
+      "commands": [
+        "clean",
+        "build",
+        "test"
+      ],
+      "env": {
+        "buildtype": "dev"
+      },
+      "default": true,
+      "dependency_types": {
+        "code": [
+          "code",
+          "test"
+        ],
+        "built": [
+          "built",
+          "test"
+        ]
+      }
+    },
+    {
+      "name": "continuous.*",
+      "commands": [
+        "clean",
+        "build",
+        "test"
+      ],
+      "env": {
+        "buildtype": "dev"
+      },
+      "dependency_types": {
+        "code": [
+          "code",
+          "test"
+        ],
+        "built": [
+          "built",
+          "test"
+        ]
+      }
+    },
+    {
+      "name": "official.*",
+      "commands": [
+        "clean",
+        "publish_prep",
+        "build",
+        "test",
+        "publish"
+      ],
+      "env": {
+        "buildtype": "official"
+      },
+      "dependency_types": {
+        "code": [
+          "code",
+          "test"
+        ],
+        "built": [
+          "built",
+          "test"
+        ]
+      }
+    },
+    {
+      "name": "test.*",
+      "commands": [
+        "clean",
+        "publish_prep",
+        "build",
+        "test",
+        "publish"
+      ],
+      "env": {
+        "buildtype": "official"
+      },
+      "dependency_types": {
+        "code": [
+          "built",
+          "test"
+        ],
+        "built": [
+          "built",
+          "test"
+        ]
+      }
+    },
+    {
+      "name": "memcheck.*",
+      "commands": [
+        "clean",
+        "publish_prep_memcheck",
+        "build",
+        "test",
+        "publish_memcheck"
+      ],
+      "env": {
+        "buildtype": "dev",
+        "memcheck": "yesplease"
+      },
+      "dependency_types": {
+        "code": [
+          "code",
+          "test"
+        ],
+        "built": [
+          "built",
+          "test",
+          "memcheck"
+        ]
+      }
+    }
+  ],
+  "components": [
+    {
+      "name": "ss",
+      "dependencies": [
+        {
+          "component": "SampleApp",
+          "type": "code"
+        },
+        {
+          "component": "samplelib",
+          "type": "code"
+        }
+      ]
+    },
+    {
+      "name": "SampleApp",
+      "dependencies": [
+        {
+          "component": "SampleFramework",
+          "type": "code"
+        }
+      ]
+    },
+    {
+      "name": "SampleFramework",
+      "dependencies": [
+        {
+          "component": "SampleCppUnit",
+          "type": "code"
+        },
+        {
+          "component": "cpp3p",
+          "type": "code"
+        }
+      ]
+    },
+    {
+      "name": "cpp3p",
+      "dependencies": [
+        {
+          "component": "SampleCppUnit",
+          "type": "code"
+        }
+      ]
+    },
+    {
+      "name": "SampleCppUnit",
+      "dependencies": [
+        {
+          "component": "buildscripts",
+          "type": "code"
+        },
+        {
+          "component": "boost",
+          "type": "built"
+        }
+      ]
+    },
+    {
+      "name": "boost",
+      "dependencies": [
+        {
+          "component": "buildscripts",
+          "type": "code"
+        }
+      ]
+    },
+    {
+      "name": "samplelib",
+      "dependencies": [
+        {
+          "component": "SampleFramework",
+          "type": "code"
+        }
+      ]
+    },
+    {
+      "name": "buildscripts",
+      "dependencies": []
+    },
+    {
+      "name": "xyzzy",
+      "attributes": {
+        "variable": true
+      },
+      "aspects": [
+        {
+          "name": "code",
+          "type": "code",
+          "vcsrepo": {
+            "provider": "git",
+            "source": "${user.git.name}@github:/xyzzy/xyzzy",
+            "revision": "3b9e9aa094cd3c3ca0e1f8d756eb37ff0ae3135f"
+          }
+        }
+      ]
+    },
+    {
+      "name": "ss_test",
+      "commands": [
+        {
+          "name": "build",
+          "type": "command",
+          "command": ["./ss_build.sh"]
+        }
+      ],
+      "aspects": [
+        {
+          "name": "code",
+          "type": "code",
+          "vcsrepo": {
+            "provider": "bzr",
+            "source": "${user.bzr.name}@192.0.2.100:/reporoot/${branch}/${component}/code",
+            "revision": "${branch}-${built}"
+          }
+        }
+      ]
+    }
+  ]
+}
