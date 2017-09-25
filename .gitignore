@@ -1,0 +1,7 @@
+*__pycache__
+*.pyc
+*.swp
+build/archlinux/pkg/
+build/archlinux/sandman-build/
+build/archlinux/sandman-git-*.pkg.tar.xz
+build/archlinux/src/

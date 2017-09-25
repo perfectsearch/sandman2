@@ -1,0 +1,74 @@
+#!/usr/bin/env python3
+# (c) 2016 Kim Ebert and contributors
+# Licensed under the MIT license
+import sys
+import argparse as ap
+import argcomplete
+import os
+from lib.config import Config
+from lib.repositories import Repositories
+from lib.config import LOCAL_CONF
+from lib.config import DEFAULT_CONF
+import json
+
+if sys.version_info[0] != 3 or sys.version_info[1] < 4:
+    print("This script requires at least Python version 3.4")
+    sys.exit(1)
+
+
+class SetEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, set):
+            return list(obj)
+        return json.JSONEncoder.default(self, obj)
+
+
+def main(**args_):
+    r = Repositories(Config.get_config(config_path=args_['config_path']))
+    repositories = None
+    if args_['command'] == "changesets":
+        repositories = r.get_repository_changesets(args_['changeset_branch'])
+    elif args_['command'] == "build-info":
+        repositories = r.get_build_info()
+    if repositories:
+        with open(args_['output_file'], 'w') as c_file:
+            c_file.write(json.dumps(repositories, indent=3, cls=SetEncoder))
+
+if __name__ == '__main__':
+    sandbox_dir = os.path.join(os.path.expanduser('~'), 'sandboxes')
+    config_path = Config.local_config_to_parse()
+    output_file = '/tmp/repositories.json'
+    parser = ap.ArgumentParser(description="A tool to help get repository information based on sandman config.")
+    parser.add_argument('command',
+                        help="The available commands for the sandbox",
+                        choices=["changesets", "build-info"],
+                        default="url-components"
+                        )
+    parser.add_argument('--sandbox-dir',
+                        help="""
+                            The directory were the sandboxes will be placed.
+                            Defaults to %s
+                             """ % sandbox_dir,
+                        default=sandbox_dir)
+    parser.add_argument('--changeset-branch',
+                        help="""
+                            Used if you want the changesets of a specific branch.
+                            Defaults to all
+                             """,
+                        default='all')
+    parser.add_argument('--output-file',
+                        help="""
+                            A json file that lists the current repositories.
+                            Defaults to %s
+                             """ % output_file,
+                        default=output_file)
+    parser.add_argument('--config-path',
+                        help="""
+                            The sandman configuration file.  Uses %s by default but
+                            %s would override that. Currently it is using %s.
+                             """ % (DEFAULT_CONF, LOCAL_CONF, config_path),
+                        default=config_path)
+    argcomplete.autocomplete(parser)
+    args = parser.parse_args()
+    main(**vars(args))
+

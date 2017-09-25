@@ -1,0 +1,115 @@
+# This is an example PKGBUILD file. Use this as a start to creating your own,
+# and remove these comments. For more information, see 'man PKGBUILD'.
+# NOTE: Please fill out the license field for your package! If it is unknown,
+# then please put 'unknown'.
+
+# See http://wiki.archlinux.org/index.php/VCS_PKGBUILD_Guidelines
+# for more information on packaging from GIT sources.
+
+# Maintainer: Your Name <youremail@domain.com>
+pkgname=sandman-git
+pkgver=r86.02f7bb6
+pkgrel=1
+pkgdesc=""
+arch=(x86_64)
+url=""
+license=('???')
+groups=()
+depends=('python>=3.4' 'python-nose')
+makedepends=('git')
+provides=()
+conflicts=()
+replaces=()
+backup=()
+options=()
+install=
+source=(sandman-build::git+ssh://bzr.perfectsearchcorp.com:/gitroot/sandman2/code Makefile config.json sandman.sh)
+noextract=()
+md5sums=('SKIP' 'SKIP' 'SKIP' 'SKIP') #generate with 'makepkg -g'
+
+_gitname=sandman
+
+pkgver() {
+	cd "$_gitname-build"
+	printf "r%s.%s" "$(git rev-list --count HEAD)" "$(git rev-parse --short HEAD)"
+}
+
+build() {
+  msg "Starting build..."
+
+  cd "$srcdir/$_gitname-build"
+  #
+  # BUILD HERE
+  #
+  #./autogen.sh
+  #./configure --prefix=/usr
+  #make
+	cp "$srcdir/Makefile" "$srcdir/$_gitname-build"
+	cp "$srcdir/config.json" "$srcdir/$_gitname-build"
+	cp "$srcdir/sandman.sh" "$srcdir/$_gitname-build"
+	cd build
+	#./build.sh tar.xz
+
+#chown -R $USER:$USER $ROOT
+}
+
+package() {
+  cd "$srcdir/$_gitname-build"
+  make DESTDIR="$pkgdir/" install
+}
+
+# vim:set ts=2 sw=2 et:
+
+#[[ $# -eq 0 ]] && type="rpm" || type="$1"
+#ROOT=root
+#VERSION=`date +%s`
+#SANDMAN_HOME=$ROOT/opt/sandman
+#rm -rf $ROOT
+#rm -rf *.rpm
+#rm -rf *.deb
+#mkdir -p $SANDMAN_HOME/bin
+#mkdir -p $SANDMAN_HOME/etc
+#mkdir -p $SANDMAN_HOME/cache
+#mkdir -p $ROOT/etc/profile.d
+#cp ../sb2 $SANDMAN_HOME/bin
+#cp ../sm $SANDMAN_HOME/bin
+#cp ../LICENSE $SANDMAN_HOME
+#cp ../README.txt $SANDMAN_HOME
+#cp ../requirements.txt $SANDMAN_HOME
+#echo 'eval "$(register-python-argcomplete sb2)"
+#eval "$(register-python-argcomplete sm)"
+#export PATH=$PATH:/opt/sandman/bin
+#export PATH=$PATH:/opt/rh/git19/root/usr/bin
+#'> $ROOT/etc/profile.d/sandman.sh
+#cat >$SANDMAN_HOME/etc/config.json <<EOL
+#{
+#	"vcsrepo": {
+#		"path": "/opt/sandman/cache/config",
+#		"source": "\${system_user}@192.0.2.100:/gitroot/sandman-config",
+#		"revision": "master",
+#		"provider": "git"
+#	},
+#	"user": {
+#		"bzr": {"name": "\${system_user}"},
+#		"git": {"name": "\${system_user"}
+#	}
+#}
+#EOL
+#rm -rf ../lib/*.pyc
+#rm -rf ../vcs/*.pyc
+#rm -rf ../lib/__pycache*
+#rm -rf ../vcs/__pycache*
+#cp -r ../lib  $SANDMAN_HOME/bin
+#cp -r ../vcs  $SANDMAN_HOME/bin
+#description="Sandman built from commit "`git rev-parse HEAD | head -c 8`
+#if [ $type = "rpm" ]; then
+#	fpm -s dir -t $type -n sandman -d bzr -d git19-git -d python34-jsonschema -d python34-setuptools -v $VERSION --after-install scripts/post_install_rpm.sh --description "$description" -C $ROOT
+#	sudo yum upgrade -y ./sandman*
+#elif [ $type = "deb" ]; then
+#	fpm -s dir -t $type -n sandman -d bzr -d git -d python3-argcomplete -d python3-jsonschema -v $VERSION --after-install scripts/post_install_deb.sh --description "$description" -C $ROOT
+#	ansible-playbook scripts/test_build_on_mint.yml
+#else
+#	echo "$type not supported"
+#fi
+#
+##chown -R $USER:$USER $ROOT

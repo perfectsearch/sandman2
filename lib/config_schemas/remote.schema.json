@@ -1,0 +1,191 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "description": "schema for the remote configuration file",
+  "type": "object",
+  "required": [ "aspects", "commands", "sandbox_types", "components"],
+  "properties": {
+    "aspects": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "$ref": "#/definitions/aspect"
+      }
+    },
+    "commands": {
+      "type":"array",
+      "items": {
+        "type": "object",
+        "$ref": "#/definitions/command"
+      }
+    },
+    "sandbox_types": {
+      "type":"array",
+      "items": {
+        "type": "object",
+        "$ref": "#/definitions/sandbox_type"
+      }
+    },
+    "components": {
+      "type":"array",
+      "items": {
+        "type": "object",
+        "$ref": "#/definitions/component"
+      }
+    }
+  },
+  "additionalProperties": false,
+  "definitions": {
+    "aspect": {
+        "type": "object",
+        "required": ["name", "type", "vcsrepo"],
+        "properties": {
+          "name": {"type":"string"},
+          "type": {"type":"string"},
+          "vcsrepo": {
+            "$ref": "#/definitions/vcsrepo"
+          }
+        },
+        "additionalProperties": false
+    },
+    "vcsrepo": {
+        "type": "object",
+        "required": ["provider", "source", "revision"],
+        "properties": {
+          "provider": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string"
+          },
+          "revision": {
+            "type": "string"
+          },
+          "user": {
+            "type": "string"
+          }
+        },
+       "additionalProperties": false
+    },
+    "command": {
+      "oneOf": [ {
+        "description": "A command type",
+        "type": "object",
+        "required": ["name", "type", "command"],
+        "properties": {
+          "name": {"type": "string"},
+          "type": {
+            "enum": [
+              "command"
+            ]
+          },
+          "command": {
+            "type": "array"
+          },
+          "env": {
+            "type": "object"
+          },
+          "cwd": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      }, {
+          "description": "A builtin type",
+          "type": "object",
+          "required": ["name", "type"],
+          "properties": {
+            "name": {
+              "type": "string"
+            },
+            "type": {
+              "enum": [
+                "builtin"
+              ]
+            },
+            "env": {
+              "type": "object"
+            }
+          },
+          "additionalProperties": false
+      }]
+    },
+    "sandbox_type": {
+      "type": "object",
+      "required": ["name", "commands", "dependency_types"],
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "commands": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "default": {
+          "type": "boolean"
+        },
+        "env": {
+          "type": "object"
+        },
+        "dependency_types": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "component": {
+      "type": "object",
+      "required": ["name"],
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "dependencies": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/dependency"
+          }
+        },
+        "attributes": {
+          "type": "object"
+        },
+        "aspects": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/aspect"
+          }
+        },
+        "commands": {
+          "type":"array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/command"
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "dependency": {
+      "type": "object",
+      "required": ["component", "type"],
+      "properties": {
+        "component": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}

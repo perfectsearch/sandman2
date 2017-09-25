@@ -1,0 +1,59 @@
+{
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "description": "schema for the local configuration file",
+    "type": "object",
+    "required": [
+        "vcsrepo",
+        "user"
+    ],
+    "properties": {
+        "vcsrepo": {
+            "type": "object",
+            "$ref": "#/definitions/vcsrepo"
+        },
+        "user": {
+            "type": "object",
+            "$ref": "#/definitions/user"
+        }
+    },
+    "additionalProperties": false,
+    "definitions": {
+        "vcsrepo": {
+            "type": "object",
+            "required": [
+                "provider",
+                "source",
+                "revision",
+                "path"
+            ],
+            "properties": {
+                "provider": {
+                    "type": "string"
+                },
+                "source": {
+                    "type": "string"
+                },
+                "revision": {
+                    "type": "string"
+                },
+                "path": {
+                    "type": "string"
+                }
+            }
+        },
+        "user": {
+            "type": "object",
+            "additionalProperties": {
+                "required": [
+                    "name"
+                ],
+                "properties": {
+                    "name": {
+                        "type": "string"
+                    }
+                }
+            }
+        }
+    }
+}
+

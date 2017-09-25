@@ -1,0 +1,68 @@
+#!/usr/bin/env python3
+# (c) 2016 Kim mEbert and contributors
+# Licensed under the MIT license
+import sys
+import argparse as ap
+import argcomplete
+import os
+from lib.config import Config
+from lib.config import LOCAL_CONF
+from lib.config import DEFAULT_CONF
+from lib.sandbox import Sandbox
+sys.tracebacklimit = None
+
+if sys.version_info[0] != 3 or sys.version_info[1] < 4:
+    print("This script requires at least Python version 3.4")
+    sys.exit(1)
+
+
+class ChoicesCompleter(object):
+    def __call__(self, **kwargs):
+        return [Sandbox.get_sandbox_from_path('.')[1]]
+
+
+def main(**args_):
+    sandbox = Sandbox(args_['sandbox_dir'], args_['sandbox_name'], Config.get_config(config_path=args_['config_path']),
+                      args_['debug'], args_['bu2_components'])
+    getattr(sandbox, args_['command'].replace('-', '_'))()
+
+if __name__ == '__main__':
+    sandbox_dir = os.path.join(os.path.expanduser('~'), 'sandboxes')
+    config_path = Config.local_config_to_parse()
+    parser = ap.ArgumentParser(description="A tool that replaces sadm.")
+    parser.add_argument('command',
+                        help="The available commands for the sandbox",
+                        choices=["init", "remove", "status", "missing", "update", "force-update", "publish-prep",
+                                 "publish", "commit-info", "bu2-dependencies"]
+                        )
+    parser.add_argument('sandbox_name',
+                        help="The name of the sandbox(<component>.<branch>.<sandbox type>) eg. ss.v712_release.dev",
+                        ).completer = ChoicesCompleter()
+    parser.add_argument('--sandbox-dir',
+                        help="""
+                            The directory were the sandboxes will be placed.
+                            Defaults to %s
+                             """ % sandbox_dir,
+                        default=sandbox_dir)
+    parser.add_argument('--config-path',
+                        help="""
+                            The sandman configuration file.  Uses %s by default but
+                            %s would override that. Currently it is using %s.
+                             """ % (DEFAULT_CONF, LOCAL_CONF, config_path),
+                        default=config_path)
+    parser.add_argument('--bu2-components',
+                        help="""
+                          A comma separated list of components if building multiple components.
+                        """,
+                        default="")
+    parser.add_argument('--debug',
+                        help="""
+                             Print debug output if any.
+                             """,
+                        dest='debug',
+                        action='store_true')
+    parser.set_defaults(debug=False)
+    argcomplete.autocomplete(parser)
+    args = parser.parse_args()
+    main(**vars(args))
+

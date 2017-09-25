@@ -1,0 +1,18 @@
+---
+# This is used for now after you create a new sandman-config from TestSandman
+- hosts: mint
+  tasks:
+     - name: remove old sandman package
+       file:
+         path='/tmp/sandman'
+         state=absent
+     - name: Copy over updated one
+       synchronize:
+         src=../..
+         dest=/tmp/sandman
+     - name: Rename deb package
+       shell: cp /tmp/sandman/build/sandman* /tmp/sandman/sandman.deb
+     - name: install sandman on mint
+       become: true
+       apt:
+         deb: /tmp/sandman/sandman.deb

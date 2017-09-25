@@ -1,0 +1,13 @@
+{
+	"vcsrepo": {
+		"path": "/opt/sandman/cache/config",
+		"source": "${system_user}@192.0.2.100:/gitroot/sandman-config",
+		"revision": "master",
+		"provider": "git"
+	},
+	"user": {
+		"bzr": {"name": "${system_user}"},
+		"git": {"name": "${system_user}"}
+	}
+}
+
